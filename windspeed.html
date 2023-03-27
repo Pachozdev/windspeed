@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <input type="file" id="windspeed"> <br>
+    <script>
+        const ipt = document.getElementById('windspeed');
+        ipt.onchange = function () {
+            var res;
+            if (this.files.length) {
+                let file = this.files[0];
+                let reader = new FileReader();
+                reader.readAsText(file);
+                this.getRes = reader.onload = function () {
+                    let data = this.result;//此时data的格式是string，但是结构为普通json格（多行）
+
+                    //压缩成一行
+                    function compressJsonStr(data) {
+                        return JSON.stringify(JSON.parse(data));
+                    }
+                    let jsonData = compressJsonStr(data);//压缩成一行的字符串。
+                    res = JSON.parse(jsonData);//此时格式变成文件本身格式（本项目数组中包含json格式内容），可进行取值操作了。
+                    var time = [];
+                    var reason = [];
+                    var speed = [];
+                    var asName = ['as1', 'as2', 'as3', 'as4', 'as5', 'as6', 'as7', 'as8'];
+                    var asAreaName = ['ct', 'ds', 'tk', 'tc', '3d'];
+                    var speedArr = [];
+
+                    for (var i = 0; i < res.length; i++) {
+                        time.push(res[i].time);
+                        reason.push(res[i].reason);
+                        speed.push(res[i].speed);//speed是一个数组，数组的每一个元素对应每一次测得的风速数据。
+
+                        //创建表格，及测试时间行、测试原因行
+                        var table = document.createElement('table');
+                        var trTime = document.createElement('tr');
+                        var trReason = document.createElement('tr');
+                        var tdTimeKey = document.createElement('td');
+                        var tdTimeValue = document.createElement('td');
+                        var tdReasonKey = document.createElement('td');
+                        var tdReasonValue = document.createElement('td');
+
+                        function setAttributes(element, attributes) {
+                            //Object.keys()方法，返回一个由给定对象的自身的可枚举属性组成的数组，对象key-value(键值对)中的key。
+                            Object.keys(attributes).forEach(attr => {
+                                element.setAttribute(attr, attributes[attr]);
+                            });
+                        }//forEach()方法方法用于调用数组的每个元素，并将元素传递给回调函数。
+                        const tableAttributes = {
+                            class: 'table',
+                            border: '1',
+                            style: 'margin-top:5px;width:400px;font-size:12px;text-align:center'
+                        };
+                        setAttributes(table, tableAttributes);
+
+                        tdTimeKey.setAttribute('width', '20%');
+                        tdReasonKey.setAttribute('width', '20%');
+                        tdTimeValue.setAttribute('style', 'text-align:left');
+                        tdReasonValue.setAttribute('style', 'text-align:left');
+
+                        //把表格插入页面
+                        document.body.appendChild(table);
+
+                        //生成“测试时间”行
+                        tdTimeKey.innerHTML = "测试时间";
+                        tdTimeValue.innerHTML = time[i];
+                        trTime.appendChild(tdTimeKey);
+                        trTime.appendChild(tdTimeValue);
+
+                        //生成“测试原因”行
+                        tdReasonKey.innerHTML = "测试原因";
+                        tdReasonValue.innerHTML = reason[i];
+                        trReason.appendChild(tdReasonKey);
+                        trReason.appendChild(tdReasonValue);
+
+                        //将“测试时间”、“测试原因行”插入表格中
+                        table.appendChild(trTime);
+                        table.appendChild(trReason);
+
+                        var speedData = speed[i];//第i次循环，speedData中存入第i次调试数据，speedData的数据类型是Object。
+
+                        //生成as1~as8等8块气浴板
+                        for (var m = 0; m < asName.length; m++) {
+                            if (Object.keys(speedData)[m] == asName[m]) {
+                                var areaData = Object.values(speedData)[m];
+                            }
+                            var trAs = document.createElement('tr');
+                            var tdAsName = document.createElement('td');
+                            tdAsName.innerHTML = asName[m];
+                            trAs.appendChild(tdAsName);
+                            //生成ct ds tk tc 3d等各区域数据
+                            for (var n = 0; n < asAreaName.length; n++) {
+                                var trAsData = document.createElement('tr');
+                                var tdAsDataName = document.createElement('td');
+                                var tdAsDataValue = document.createElement('td');
+                                var tdAsDataMeanValue = document.createElement('td');
+
+                                tdAsDataName.innerHTML = asAreaName[n];
+                                if (Object.keys(areaData)[n] == asAreaName[n]) {
+                                    // console.log(Object.keys(areaData)[n], Object.values(areaData)[n]);
+                                    tdAsDataValue.innerHTML = Object.values(areaData)[n];
+                                    const tdAsDataValueAttribute = {
+                                        style: 'width:260px;font-size:12px;text-align:left'
+                                    }
+                                    setAttributes(tdAsDataValue, tdAsDataValueAttribute);
+                                    // reduce()方法，将数组中的元素依次进行指定函数进行操作，并存起来供下一次迭代使用。第二个参数“0”，指的是初始值是0，即第一个pre是0，第一个next是数组的第一个元素，计算结果当作第二轮的pre
+                                    const average = (args) => args.reduce((pre, next) => pre + next, 0) / args.length;
+                                    tdAsDataMeanValue.innerHTML = average(Object.values(areaData)[n]);
+                                }
+
+                                trAsData.appendChild(tdAsDataName);
+                                trAsData.appendChild(tdAsDataValue);
+                                trAsData.appendChild(tdAsDataMeanValue);
+                                trAs.appendChild(trAsData);
+                            }
+                            table.appendChild(trAs);
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
