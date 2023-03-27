@@ -57,12 +57,12 @@
                         const tableAttributes = {
                             class: 'table',
                             border: '1',
-                            style: 'margin-top:5px;width:400px;font-size:12px;text-align:center'
+                            style: 'margin-top:5px;margin:auto;font-size:12px;text-align:center'
                         };
                         setAttributes(table, tableAttributes);
 
                         tdTimeKey.setAttribute('width', '20%');
-                        tdReasonKey.setAttribute('width', '20%');
+                        // tdReasonKey.setAttribute('width', '20%');
                         tdTimeValue.setAttribute('style', 'text-align:left');
                         tdReasonValue.setAttribute('style', 'text-align:left');
 
@@ -113,7 +113,7 @@
                                     setAttributes(tdAsDataValue, tdAsDataValueAttribute);
                                     // reduce()方法，将数组中的元素依次进行指定函数进行操作，并存起来供下一次迭代使用。第二个参数“0”，指的是初始值是0，即第一个pre是0，第一个next是数组的第一个元素，计算结果当作第二轮的pre
                                     const average = (args) => args.reduce((pre, next) => pre + next, 0) / args.length;
-                                    tdAsDataMeanValue.innerHTML = average(Object.values(areaData)[n]);
+                                    tdAsDataMeanValue.innerHTML = average(Object.values(areaData)[n]).toFixed(2);//保留两位小数
                                 }
 
                                 trAsData.appendChild(tdAsDataName);
